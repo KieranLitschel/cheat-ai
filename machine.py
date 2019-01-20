@@ -60,6 +60,7 @@ class AIPlayer:
         self.add_cards_to_hand(starting_hand)
         self.last_played_value = None
         self.last_computer_value_said = None
+        self.cards_in_other_players_hand = len(starting_hand.split(" "))
 
     # This is called if we lied and got caught
     def add_cards_to_hand(self, card_str):
@@ -76,6 +77,7 @@ class AIPlayer:
 
     # This is called if we caught the other player lying
     def other_player_takes_pile(self):
+        self.cards_in_other_players_hand += len(self.pile)
         for value in VALUES:
             self.other_player_hand[value] += self.pile[value]
             self.pile[value] = 0
@@ -96,7 +98,9 @@ class AIPlayer:
 
     def other_players_play(self, played_value, number_played):
         self.cards_in_pile += number_played
-        if self.our_hand[played_value] + number_played > 4:
+        self.cards_in_other_players_hand -= number_played
+        # Call cheat if it appears they've played a card in our hand, or if we do not call cheat now they will win the game
+        if self.our_hand[played_value] + number_played > 4 or self.cards_in_other_players_hand == 0:
             self.last_played_value = None
             print("I believe the other player has cheated.")
         else:
@@ -116,7 +120,7 @@ class AIPlayer:
             print("Error got best_move is %s" % best_move)
         else:
             print("Tell the other player I've played: %s * %ss, Actually play: %s" % (
-            best_move[0], best_move[1], best_move[2:len(best_move)]))
+                best_move[0], best_move[1], best_move[2:len(best_move)]))
             if best_move[2:len(best_move)].count(best_move[1]) != best_move[0]:
                 self.no_times_lied_this_round += 1
             self.last_computer_value_said = best_move[1]
@@ -165,8 +169,9 @@ class AIPlayer:
 
                             # Force computer not to say same thing twice in a row if its lying, as found to be a big tell
 
-                            if self.other_player_hand[value] + no_cards_played <= 4 and value != self.last_computer_value_said:
-                                new_score = score_to_date - self.probs_call_cheat * no_cards_played
+                            if self.other_player_hand[
+                                value] + no_cards_played <= 4 and value != self.last_computer_value_said:
+                                new_score = score_to_date - self.probs_call_cheat * len(self.pile)
                                 poss_future_scores = 0
                                 for other_player_next_value in other_player_poss_values:
                                     score, _ = self.next_best_move(other_player_next_value, new_cards_in_hand,
