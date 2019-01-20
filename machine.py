@@ -66,7 +66,7 @@ class AIPlayer:
     # This is called if we lied and got caught
     def add_cards_to_hand(self, card_str):
         new_cards = card_str.split(" ")
-        self.computer_cards_at_start_of_round = self.our_hand
+        self.computer_cards_at_start_of_round = self.our_hand.copy()
         for new_card in new_cards:
             self.our_hand[new_card] += 1
             self.computer_cards_at_start_of_round[new_card] += 1
@@ -94,6 +94,8 @@ class AIPlayer:
     def you_take_pile(self, cards):
         for card in cards.split(" "):
             self.our_hand[card] += 1
+            if self.our_hand[card] > self.computer_cards_at_start_of_round[card]:
+                self.computer_cards_at_start_of_round[card] += 1
             if self.other_player_hand[card] > 0:
                 self.other_player_hand[card] -= 1
         for value in VALUES:

@@ -1,4 +1,4 @@
 import machine
 
-ai = machine.AIPlayer("7 7 7 6 6 5 K 10 4 10")
+ai = machine.AIPlayer("10 2 7 Q 9 A 4")
 ai.play_cards()
