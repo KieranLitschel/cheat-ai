@@ -105,7 +105,8 @@ class AIPlayer:
         self.cards_in_pile += number_played
         self.cards_in_other_players_hand -= number_played
         # Call cheat if it appears they've played a card in our hand, or if we do not call cheat now they will win the game
-        if self.computer_cards_at_start_of_round[played_value] + number_played > 4 or self.cards_in_other_players_hand == 0:
+        if self.computer_cards_at_start_of_round[
+            played_value] + number_played > 4 or self.cards_in_other_players_hand == 0:
             self.last_played_value = None
             print("I believe the other player has cheated.")
         else:
@@ -133,7 +134,7 @@ class AIPlayer:
 
     def next_best_move(self, last_played_value, cards_in_hand, score_to_date, depth, no_in_pile):
         # Limit depth of problem to reduce complexity
-        if depth == 0:
+        if depth == 0 or sum([cards_in_hand[value] for value in VALUES]) == 0:
             return 0, ""
         else:
             best_score = -float('inf')
