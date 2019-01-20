@@ -59,6 +59,7 @@ class AIPlayer:
             self.other_player_hand[value] = 0
         self.add_cards_to_hand(starting_hand)
         self.last_played_value = None
+        self.last_computer_value_said = None
 
     # This is called if we lied and got caught
     def add_cards_to_hand(self, card_str):
@@ -70,6 +71,8 @@ class AIPlayer:
             self.probs_call_cheat_list.append(1 / self.no_times_lied_this_round)
             self.probs_call_cheat = sum(self.probs_call_cheat_list) / len(self.probs_call_cheat_list)
             self.no_times_lied_this_round = 0
+        self.last_played_value = None
+        self.last_computer_value_said = None
 
     # This is called if we caught the other player lying
     def other_player_takes_pile(self):
@@ -80,6 +83,8 @@ class AIPlayer:
             self.probs_call_cheat_list.append(1 / self.no_times_lied_this_round)
             self.probs_call_cheat = sum(self.probs_call_cheat_list) / len(self.probs_call_cheat_list)
             self.no_times_lied_this_round = 0
+        self.last_played_value = None
+        self.last_computer_value_said = None
 
     def you_take_pile(self, cards):
         for card in cards.split(" "):
@@ -110,9 +115,11 @@ class AIPlayer:
         if len(best_move) < 3:
             print("Error got best_move is %s" % best_move)
         else:
-            print("Tell the other player I've played: %s * %ss, Actually play: %s" % (best_move[0], best_move[1], best_move[2:len(best_move)]))
+            print("Tell the other player I've played: %s * %ss, Actually play: %s" % (
+            best_move[0], best_move[1], best_move[2:len(best_move)]))
             if best_move[2:len(best_move)].count(best_move[1]) != best_move[0]:
                 self.no_times_lied_this_round += 1
+            self.last_computer_value_said = best_move[1]
         print("Took %.2f seconds" % (time.time() - start))
 
     def next_best_move(self, last_played_value, cards_in_hand, score_to_date, depth):
@@ -146,13 +153,19 @@ class AIPlayer:
                         new_cards_in_hand = cards_in_hand.copy()
                         for card_played in cards_played:
                             new_cards_in_hand[card_played] -= 1
+
                         # If the number of the cards we've played of the claimed value does not match the number of cards
                         # we've played, we must have lied, so we need to take into consideration the risk of being called
                         # a cheat that is associated with this
+                        
                         if cards_played.count(value) != no_cards_played:
+
                             # If we know the other player has the cards we're claiming to have, or have placed them in the pile,
                             # then we don't play that move as there is a higher risk associated
-                            if self.other_player_hand[value] + no_cards_played <= 4:
+
+                            # Force computer not to say same thing twice in a row if its lying, as found to be a big tell
+
+                            if self.other_player_hand[value] + no_cards_played <= 4 and value != self.last_computer_value_said:
                                 new_score = score_to_date - self.probs_call_cheat * no_cards_played
                                 poss_future_scores = 0
                                 for other_player_next_value in other_player_poss_values:
