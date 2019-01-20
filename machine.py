@@ -53,6 +53,7 @@ class AIPlayer:
         self.pile = {}
         self.cards_in_pile = 0
         self.other_player_hand = {}
+        self.computer_cards_at_start_of_round = {}
         for value in VALUES:
             self.our_hand[value] = 0
             self.pile[value] = 0
@@ -65,8 +66,10 @@ class AIPlayer:
     # This is called if we lied and got caught
     def add_cards_to_hand(self, card_str):
         new_cards = card_str.split(" ")
+        self.computer_cards_at_start_of_round = self.our_hand
         for new_card in new_cards:
             self.our_hand[new_card] += 1
+            self.computer_cards_at_start_of_round[new_card] += 1
         # Recalculate the probability of the other player calling us as cheating
         if self.no_times_lied_this_round != 0:
             self.probs_call_cheat_list.append(1 / self.no_times_lied_this_round)
@@ -100,7 +103,7 @@ class AIPlayer:
         self.cards_in_pile += number_played
         self.cards_in_other_players_hand -= number_played
         # Call cheat if it appears they've played a card in our hand, or if we do not call cheat now they will win the game
-        if self.our_hand[played_value] + number_played > 4 or self.cards_in_other_players_hand == 0:
+        if self.computer_cards_at_start_of_round[played_value] + number_played > 4 or self.cards_in_other_players_hand == 0:
             self.last_played_value = None
             print("I believe the other player has cheated.")
         else:
