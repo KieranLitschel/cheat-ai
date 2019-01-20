@@ -1,5 +1,6 @@
 from itertools import combinations
 import random
+import time
 
 VALUES = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
 
@@ -92,25 +93,27 @@ class AIPlayer:
         self.cards_in_pile += number_played
         if self.our_hand[played_value] + number_played > 4:
             self.last_played_value = None
-            return "CHEAT"
+            print("I believe the other player has cheated.")
         else:
-            return self.predict_other_player(played_value)
+            self.predict_other_player(played_value)
 
     def predict_other_player(self, played_value):
         # Add predicting emotions
         self.last_played_value = played_value
-        return "TRUTH"
+        print("I belive the other player is telling the truth.")
 
     def play_cards(self):
+        start = time.time()
         _, best_move = self.next_best_move(self.last_played_value, self.our_hand, 0, 2)
         for card in best_move[2:len(best_move)]:
             self.our_hand[card] -= 1
         if len(best_move) < 3:
             print("Error got best_move is %s" % best_move)
         else:
-            print("Say: %s * %ss, Play: %s" % (best_move[0], best_move[1], best_move[2:len(best_move)]))
+            print("Tell the other player I've played: %s * %ss, Actually play: %s" % (best_move[0], best_move[1], best_move[2:len(best_move)]))
             if best_move[2:len(best_move)].count(best_move[1]) != best_move[0]:
                 self.no_times_lied_this_round += 1
+        print("Took %.2f seconds" % (time.time() - start))
 
     def next_best_move(self, last_played_value, cards_in_hand, score_to_date, depth):
         # Limit depth of problem to reduce complexity
