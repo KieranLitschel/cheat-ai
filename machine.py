@@ -113,7 +113,7 @@ class AIPlayer:
 
     def play_cards(self):
         start = time.time()
-        _, best_move = self.next_best_move(self.last_played_value, self.our_hand, 0, 2)
+        _, best_move = self.next_best_move(self.last_played_value, self.our_hand, 0, 2, len(self.pile))
         for card in best_move[2:len(best_move)]:
             self.our_hand[card] -= 1
         if len(best_move) < 3:
@@ -126,7 +126,7 @@ class AIPlayer:
             self.last_computer_value_said = best_move[1]
         print("Took %.2f seconds" % (time.time() - start))
 
-    def next_best_move(self, last_played_value, cards_in_hand, score_to_date, depth):
+    def next_best_move(self, last_played_value, cards_in_hand, score_to_date, depth, no_in_pile):
         # Limit depth of problem to reduce complexity
         if depth == 0:
             return 0, ""
@@ -171,12 +171,12 @@ class AIPlayer:
 
                             if self.other_player_hand[
                                 value] + no_cards_played <= 4 and value != self.last_computer_value_said:
-                                new_score = score_to_date - self.probs_call_cheat * len(self.pile)
+                                new_score = score_to_date - self.probs_call_cheat * no_in_pile
                                 poss_future_scores = 0
                                 for other_player_next_value in other_player_poss_values:
                                     score, _ = self.next_best_move(other_player_next_value, new_cards_in_hand,
                                                                    new_score,
-                                                                   depth - 1)
+                                                                   depth - 1, no_in_pile + no_cards_played)
                                     poss_future_scores += score * other_player_poss_values_probs[
                                         other_player_next_value]
                                 new_score += (1 - self.probs_call_cheat) * poss_future_scores
@@ -186,7 +186,7 @@ class AIPlayer:
                             poss_future_scores = 0
                             for other_player_next_value in other_player_poss_values:
                                 score, _ = self.next_best_move(other_player_next_value, new_cards_in_hand, new_score,
-                                                               depth - 1)
+                                                               depth - 1, no_in_pile + no_cards_played)
                                 poss_future_scores += score * other_player_poss_values_probs[other_player_next_value]
                             new_score += poss_future_scores
 
