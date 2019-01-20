@@ -157,7 +157,7 @@ class AIPlayer:
                         # If the number of the cards we've played of the claimed value does not match the number of cards
                         # we've played, we must have lied, so we need to take into consideration the risk of being called
                         # a cheat that is associated with this
-                        
+
                         if cards_played.count(value) != no_cards_played:
 
                             # If we know the other player has the cards we're claiming to have, or have placed them in the pile,
